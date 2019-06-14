@@ -32,7 +32,7 @@ export default class Service {
   }
 
   static getUnits (unitId = 1) {
-    let url = `http://q-flow-tt/iwtweb/xml_IWT_Stats.aspx?controller=ACF_IWT_UnitsXML&unitid=${unitId}`
+    let url = `/iwtweb/xml_IWT_Stats.aspx?controller=ACF_IWT_UnitsXML&unitid=${unitId}`
     return fetch(url).then(res => res.text())
     // .then(str => (new window.DOMParser()).parseFromString(str, 'text/xml'))
     .then(str => xml2js(str, {compact: true}))
