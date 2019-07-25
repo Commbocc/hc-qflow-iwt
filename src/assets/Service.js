@@ -4,47 +4,49 @@ import moment from 'moment'
 export default class Service {
 
   constructor (service) {
-    this.id = service._attributes.id
+    this.id = service._attributes.ServiceId
     this.name = service._attributes.ServiceName
 
     this.stats = {}
 
-    for (var k in service.Stats) {
-      this.stats[k] = service.Stats[k]._text
+    for (var k in service) {
+      if (service[k]._text) {
+        this.stats[k] = service[k]._text
+      }
     }
   }
 
   get customersInLine () {
-    return parseInt(this.stats.PeopleWaiting)
+    return parseInt(this.stats.WaitingCount)
   }
 
   get apprxWaitTime () {
-    let apprxWaitInSeconds = (this.customersInLine * this.averageWaitSeconds)
-    return moment.duration(apprxWaitInSeconds, 'seconds').humanize()
+    return moment.duration(this.stats.TotalTime).humanize()
   }
 
+  // get apprxWaitTime () {
+  //   let apprxWaitInSeconds = (this.customersInLine * this.averageWaitSeconds)
+  //   return moment.duration(apprxWaitInSeconds, 'seconds').humanize()
+  // }
+
   get averageWaitSeconds () {
-    return moment.duration(this.stats.AVGWT).seconds()
+    return moment.duration(this.stats.AvgWT).as('seconds')
   }
 
   get maxWaitSeconds () {
-    return moment.duration(this.stats.MaxWT).seconds()
+    return moment.duration(this.stats.MaxWT).as('seconds')
   }
 
-  static getUnits (unitId = 1) {
-    let url = `/iwtweb/xml_IWT_Stats.aspx?controller=ACF_IWT_UnitsXML&unitid=${unitId}`
+  static getStats (unitId = 1) {
+    let url = `/iwtweb/xml_IWT_Stats.aspx?controller=ACF_IWT_ServiceStatsXML&unitid=${unitId}&servicefilterid=2`
     return fetch(url).then(res => res.text())
     // .then(str => (new window.DOMParser()).parseFromString(str, 'text/xml'))
     .then(str => xml2js(str, {compact: true}))
-    .then(json => json.Units.Unit.Services.Service.map(x => new Service(x)))
+    // .then(json => json.Units.Unit.Services.Service.map(x => new Service(x)))
+    .then(json => {
+      console.log(json)
+      return json.Unit.Service.map(x => new Service(x))
+    })
   }
-
-  // static getStats (unitId = 1) {
-  //   let url = `http://q-flow-tt/iwtweb/xml_IWT_Stats.aspx?controller=ACF_IWT_XML&unitid=${unitId}`
-  //   return fetch(url).then(res => res.text())
-  //   // .then(str => (new window.DOMParser()).parseFromString(str, 'text/xml'))
-  //   .then(str => xml2js(str, {compact: true}))
-  //   // .then(json => json.Units.Unit.Services.Service.map(x => new Service(x)))
-  // }
 
 }

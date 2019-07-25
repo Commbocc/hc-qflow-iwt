@@ -7,6 +7,9 @@
           <tr>
             <th>Service</th>
             <th>Customers in Line</th>
+            <th>Total Served</th>
+            <th>Average Wait Time</th>
+            <th>Max Wait Time</th>
             <th>Apprx. Wait Time</th>
           </tr>
         </thead>
@@ -14,6 +17,13 @@
           <tr v-for="service in services" :key="service.id">
             <td>{{ service.name }}</td>
             <td>{{ service.customersInLine }}</td>
+
+            <td>{{ service.stats.TotalServed }}</td>
+
+            <td>{{ service.stats.AvgWT }}</td>
+
+            <td>{{ service.stats.MaxWT }}</td>
+
             <td>{{ service.apprxWaitTime }}</td>
           </tr>
         </tbody>
@@ -39,8 +49,7 @@ export default {
   methods: {
     getUnits () {
       this.services = null
-      console.log('getting units')
-      Service.getUnits().then(data => {
+      Service.getStats().then(data => {
         // console.log('units', data)
         this.services = data
       })
@@ -54,7 +63,8 @@ export default {
   },
   mounted () {
 
-    this.getUnits()
+      this.getUnits()
+    // Service.getStats()
 
   }
 }
